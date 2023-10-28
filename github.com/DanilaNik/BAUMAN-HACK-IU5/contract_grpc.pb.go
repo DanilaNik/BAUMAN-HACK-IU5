@@ -19,48 +19,48 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	MyService_BidirectionalStreaming_FullMethodName = "/example.MyService/BidirectionalStreaming"
+	Simulation_BidirectionalStreaming_FullMethodName = "/example.Simulation/BidirectionalStreaming"
 )
 
-// MyServiceClient is the client API for MyService service.
+// SimulationClient is the client API for Simulation service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type MyServiceClient interface {
-	BidirectionalStreaming(ctx context.Context, opts ...grpc.CallOption) (MyService_BidirectionalStreamingClient, error)
+type SimulationClient interface {
+	BidirectionalStreaming(ctx context.Context, opts ...grpc.CallOption) (Simulation_BidirectionalStreamingClient, error)
 }
 
-type myServiceClient struct {
+type simulationClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewMyServiceClient(cc grpc.ClientConnInterface) MyServiceClient {
-	return &myServiceClient{cc}
+func NewSimulationClient(cc grpc.ClientConnInterface) SimulationClient {
+	return &simulationClient{cc}
 }
 
-func (c *myServiceClient) BidirectionalStreaming(ctx context.Context, opts ...grpc.CallOption) (MyService_BidirectionalStreamingClient, error) {
-	stream, err := c.cc.NewStream(ctx, &MyService_ServiceDesc.Streams[0], MyService_BidirectionalStreaming_FullMethodName, opts...)
+func (c *simulationClient) BidirectionalStreaming(ctx context.Context, opts ...grpc.CallOption) (Simulation_BidirectionalStreamingClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Simulation_ServiceDesc.Streams[0], Simulation_BidirectionalStreaming_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &myServiceBidirectionalStreamingClient{stream}
+	x := &simulationBidirectionalStreamingClient{stream}
 	return x, nil
 }
 
-type MyService_BidirectionalStreamingClient interface {
+type Simulation_BidirectionalStreamingClient interface {
 	Send(*Request) error
 	Recv() (*Response, error)
 	grpc.ClientStream
 }
 
-type myServiceBidirectionalStreamingClient struct {
+type simulationBidirectionalStreamingClient struct {
 	grpc.ClientStream
 }
 
-func (x *myServiceBidirectionalStreamingClient) Send(m *Request) error {
+func (x *simulationBidirectionalStreamingClient) Send(m *Request) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *myServiceBidirectionalStreamingClient) Recv() (*Response, error) {
+func (x *simulationBidirectionalStreamingClient) Recv() (*Response, error) {
 	m := new(Response)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -68,53 +68,53 @@ func (x *myServiceBidirectionalStreamingClient) Recv() (*Response, error) {
 	return m, nil
 }
 
-// MyServiceServer is the server API for MyService service.
-// All implementations must embed UnimplementedMyServiceServer
+// SimulationServer is the server API for Simulation service.
+// All implementations must embed UnimplementedSimulationServer
 // for forward compatibility
-type MyServiceServer interface {
-	BidirectionalStreaming(MyService_BidirectionalStreamingServer) error
-	mustEmbedUnimplementedMyServiceServer()
+type SimulationServer interface {
+	BidirectionalStreaming(Simulation_BidirectionalStreamingServer) error
+	mustEmbedUnimplementedSimulationServer()
 }
 
-// UnimplementedMyServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedMyServiceServer struct {
+// UnimplementedSimulationServer must be embedded to have forward compatible implementations.
+type UnimplementedSimulationServer struct {
 }
 
-func (UnimplementedMyServiceServer) BidirectionalStreaming(MyService_BidirectionalStreamingServer) error {
+func (UnimplementedSimulationServer) BidirectionalStreaming(Simulation_BidirectionalStreamingServer) error {
 	return status.Errorf(codes.Unimplemented, "method BidirectionalStreaming not implemented")
 }
-func (UnimplementedMyServiceServer) mustEmbedUnimplementedMyServiceServer() {}
+func (UnimplementedSimulationServer) mustEmbedUnimplementedSimulationServer() {}
 
-// UnsafeMyServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to MyServiceServer will
+// UnsafeSimulationServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SimulationServer will
 // result in compilation errors.
-type UnsafeMyServiceServer interface {
-	mustEmbedUnimplementedMyServiceServer()
+type UnsafeSimulationServer interface {
+	mustEmbedUnimplementedSimulationServer()
 }
 
-func RegisterMyServiceServer(s grpc.ServiceRegistrar, srv MyServiceServer) {
-	s.RegisterService(&MyService_ServiceDesc, srv)
+func RegisterSimulationServer(s grpc.ServiceRegistrar, srv SimulationServer) {
+	s.RegisterService(&Simulation_ServiceDesc, srv)
 }
 
-func _MyService_BidirectionalStreaming_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(MyServiceServer).BidirectionalStreaming(&myServiceBidirectionalStreamingServer{stream})
+func _Simulation_BidirectionalStreaming_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(SimulationServer).BidirectionalStreaming(&simulationBidirectionalStreamingServer{stream})
 }
 
-type MyService_BidirectionalStreamingServer interface {
+type Simulation_BidirectionalStreamingServer interface {
 	Send(*Response) error
 	Recv() (*Request, error)
 	grpc.ServerStream
 }
 
-type myServiceBidirectionalStreamingServer struct {
+type simulationBidirectionalStreamingServer struct {
 	grpc.ServerStream
 }
 
-func (x *myServiceBidirectionalStreamingServer) Send(m *Response) error {
+func (x *simulationBidirectionalStreamingServer) Send(m *Response) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *myServiceBidirectionalStreamingServer) Recv() (*Request, error) {
+func (x *simulationBidirectionalStreamingServer) Recv() (*Request, error) {
 	m := new(Request)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -122,17 +122,17 @@ func (x *myServiceBidirectionalStreamingServer) Recv() (*Request, error) {
 	return m, nil
 }
 
-// MyService_ServiceDesc is the grpc.ServiceDesc for MyService service.
+// Simulation_ServiceDesc is the grpc.ServiceDesc for Simulation service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var MyService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "example.MyService",
-	HandlerType: (*MyServiceServer)(nil),
+var Simulation_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "example.Simulation",
+	HandlerType: (*SimulationServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "BidirectionalStreaming",
-			Handler:       _MyService_BidirectionalStreaming_Handler,
+			Handler:       _Simulation_BidirectionalStreaming_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},
