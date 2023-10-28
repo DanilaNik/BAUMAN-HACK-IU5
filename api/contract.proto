@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "github.com/DanilaNik/BAUMAN-HACK-IU5";
+
+package example;
+
+service MyService {
+  rpc BidirectionalStreaming(stream Request) returns (stream Response) {}
+}
+
+message Request {
+  string data = 1;
+}
+
+message Response {
+  string result = 1;
+}
