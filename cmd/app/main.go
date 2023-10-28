@@ -1,92 +1,171 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
-	"time"
+	"net"
 
-	"github.com/gorilla/websocket"
-	//"github.com/sirupsen/logrus"
+	pb "github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5"
+	"github.com/DanilaNik/BAUMAN-HACK-IU5/internal/ds"
+	move "github.com/DanilaNik/BAUMAN-HACK-IU5/internal/grpc-handlers/rover"
+
+	"google.golang.org/grpc"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-
-	// We'll need to check the origin of our connection
-	// this will allow us to make requests from our React
-	// development server to here.
-	// For now, we'll do no checking and just allow any connection
-	CheckOrigin: func(r *http.Request) bool { return true },
+type server struct {
+	pb.UnimplementedMyServiceServer
 }
 
-// define a reader which will listen for
-// new messages being sent to our WebSocket
-// endpoint
-func reader(conn *websocket.Conn) {
+func (s *server) BidirectionalStreaming(stream pb.MyService_BidirectionalStreamingServer) error {
 	for {
-		// read in a message
-		messageType, p, err := conn.ReadMessage()
+		req, err := stream.Recv()
 		if err != nil {
-			log.Println(err)
-			return
-		}
-		// print out that message for clarity
-		fmt.Println(string(p))
-
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
+		var rover *ds.Rover = &ds.Rover{
+			ID:     1,
+			Uuid:   "00112233-4455-6677-8899-saabbccddeeff",
+			Name:   "Rover X",
+			X:      0,
+			Y:      0,
+			Charge: 86,
+		}
+
+		response := move.MoveRover(rover, req.Data)
+
+		// Handle incoming request data
+		log.Printf("Received request: %s", req.GetData())
+
+		// Create and send the response
+		err = stream.Send(&pb.Response{
+			Result: response,
+		})
+		if err != nil {
+			return err
+		}
 	}
 }
 
-func serveWs(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Host)
-
-	// upgrade this connection to a WebSocket
-	// connection
-	ws, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-	}
-	// listen indefinitely for new messages coming
-	// through on our WebSocket connection
-	go func() {
-		ticker := time.NewTicker(time.Second * 5)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				// Enter your logic here to determine the message to send
-				message := `{"xPosition":10,"yPostition":20}`
-
-				// Send the message to the client
-				err := ws.WriteMessage(websocket.TextMessage, []byte(message))
-				if err != nil {
-					log.Println(err)
-					return
-				}
-			}
-		}
-	}()
-	reader(ws)
-}
-
-func setupRoutes() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Simple Server")
-	})
-	// mape our `/ws` endpoint to the `serveWs` function
-	http.HandleFunc("/ws", serveWs)
-}
 func main() {
-	// logger := logrus.New()
-	// _ = logger
-
-	setupRoutes()
-	http.ListenAndServe("192.168.137.151:8080", nil)
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterMyServiceServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
+
+// import (
+// 	"log"
+// 	"net"
+
+// 	pb "github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5"
+// 	"google.golang.org/grpc"
+// 	//"github.com/sirupsen/logrus"
+// )
+
+// type server struct {
+// 	pb.UnimplementedMyServiceServer
+// }
+
+// func (s *server) BidirectionalStreaming(stream pb.MyService_BidirectionalStreamingServer) error {
+// 	for {
+// 		req, err := stream.Recv()
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		// Handle incoming request data
+// 		log.Printf("Received request: %s", req.GetData())
+
+// 		// Create and send the response
+// 		err = stream.Send(&pb.Response{
+// 			Result: "Response from server",
+// 		})
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+// }
+
+// func main() {
+// 	lis, err := net.Listen("tcp", ":50051")
+// 	if err != nil {
+// 		log.Fatalf("failed to listen: %v", err)
+// 	}
+// 	s := grpc.NewServer()
+// 	pb.RegisterMyServiceServer(s, &server{})
+// 	if err := s.Serve(lis); err != nil {
+// 		log.Fatalf("failed to serve: %v", err)
+// 	}
+// }
+
+// func main() {
+// 	err := runGRPCClient()
+// 	if err != nil {
+// 		log.Fatalf("failed to run gRPC client: %v", err)
+// 	}
+
+// 	// Start HTTP server
+// 	err = runHTTPServer()
+// 	if err != nil {
+// 		log.Fatalf("failed to run HTTP server: %v", err)
+// 	}
+// }
+
+// func runGRPCClient() error {
+// 	conn, err := grpc.Dial("192.168.137.68:50051", grpc.WithInsecure())
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer conn.Close()
+
+// 	client := stationpb.NewMyServiceClient(conn)
+
+// 	stream, err := client.BidirectionalStreaming(context.Background())
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	go func() {
+// 		// Send multiple requests
+// 		for i := 0; i < 5; i++ {
+// 			req := &stationpb.Request{
+// 				Data: "Request from client",
+// 			}
+// 			err := stream.Send(req)
+// 			if err != nil {
+// 				log.Fatalf("error sending request: %v", err)
+// 			}
+// 			time.Sleep(time.Second)
+// 		}
+// 		stream.CloseSend()
+// 	}()
+
+// 	go func() {
+// 		// Receive and print responses
+// 		for {
+// 			res, err := stream.Recv()
+// 			if err != nil {
+// 				log.Printf("finished receiving: %v", err)
+// 				break
+// 			}
+// 			log.Printf("Received response: %s", res.GetResult())
+// 		}
+// 	}()
+
+// 	return nil
+// }
+
+// func runHTTPServer() error {
+// 	// Start HTTP server
+// 	err := http.ListenAndServe("192.168.137.151:50051", nil)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }

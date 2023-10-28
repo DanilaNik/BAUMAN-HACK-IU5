@@ -4,12 +4,15 @@ option go_package = "github.com/DanilaNik/BAUMAN-HACK-IU5";
 
 package example;
 
-service MyService {
+service Simulation {
   rpc BidirectionalStreaming(stream Request) returns (stream Response) {}
 }
 
 message Request {
-  string data = 1;
+    string uuid = 1;
+    int64 x = 2;
+    int64 y = 3;
+    int64 z = 4; 
 }
 
 message Response {
