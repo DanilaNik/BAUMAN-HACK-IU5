@@ -17,11 +17,12 @@ message Request {
 
 message Response {
     string uuid = 1;
-    int64 x = 2;
-    int64 y = 3;
-    int64 z = 4;
-    float charge = 5;
-    int64 temperature = 6;
-    string warning = 7;
-    string alert = 8;
+    string name = 2;
+    int64 x = 3;
+    int64 y = 4;
+    int64 z = 5;
+    float charge = 6;
+    int64 temperature = 7;
+    string warning = 8;
+    string alert = 9;
 }

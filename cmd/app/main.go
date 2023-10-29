@@ -39,7 +39,7 @@ var rover *ds.Rover = &ds.Rover{
 var Warning string = "none"
 var Alert string = "none"
 
-var mx *sync.Mutex
+var mx sync.Mutex
 
 func (s *server) BidirectionalStreaming(stream pb.Simulation_BidirectionalStreamingServer) error {
 	go chargeDrain()
@@ -66,6 +66,8 @@ func (s *server) BidirectionalStreaming(stream pb.Simulation_BidirectionalStream
 			Warning:     Warning,
 			Alert:       Alert,
 		})
+
+		log.Printf("Sent response: %v", rover)
 		if err != nil {
 			return err
 		}
@@ -82,6 +84,10 @@ func asyncMove(change *pb.Request) {
 			step = -1
 		}
 		for i := 0; i < int(math.Abs(float64(change.X))); i++ {
+			tmp := rover.X + int64(step)
+			if tmp <= 0 || tmp >= 100 {
+				continue
+			}
 			rover.X += int64(step)
 			mx.Lock()
 			rover.Charge -= 0.01
@@ -96,7 +102,13 @@ func asyncMove(change *pb.Request) {
 			step = -1
 		}
 		for i := 0; i < int(math.Abs(float64(change.Y))); i++ {
+			// if rover.Y >= 1 && rover.Y <= 94 {
+			tmp := rover.Y + int64(step)
+			if tmp <= 0 || tmp >= 100 {
+				continue
+			}
 			rover.Y += int64(step)
+			// }
 			mx.Lock()
 			rover.Charge -= 0.01
 			mx.Unlock()
@@ -110,6 +122,10 @@ func asyncMove(change *pb.Request) {
 			step = -1
 		}
 		for i := 0; i < int(math.Abs(float64(change.Z))); i++ {
+			tmp := rover.Z + int64(step)
+			if tmp <= 0 || tmp >= 100 {
+				continue
+			}
 			rover.Z += int64(step)
 			mx.Lock()
 			rover.Charge -= 0.01
