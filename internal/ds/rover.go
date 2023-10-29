@@ -6,6 +6,7 @@ type Rover struct {
 	Name   string `json:"name"`
 	X      uint64 `json:"x"`
 	Y      uint64 `json:"y"`
+	Z      uint64 `json:"z"`
 	Angle  uint64 `json:"angle"`
 	Charge uint64 `json:"charge"`
 }

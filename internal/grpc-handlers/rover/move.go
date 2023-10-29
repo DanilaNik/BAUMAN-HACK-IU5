@@ -21,16 +21,11 @@ type Response struct {
 	Charge uint64 `json:"charge"`
 }
 
-var rover ds.Rover = ds.Rover{
-	ID:     1,
-	Uuid:   "00112233-4455-6677-8899-saabbccddeeff",
-	Name:   "Rover X",
-	X:      50,
-	Y:      50,
-	Charge: 86,
+type roverMover interface {
+	MoveRover(uuid string, move string) (*ds.Rover, error)
 }
 
-func MoveRover(rover1 *ds.Rover, reqStr string) string {
+func MoveRover(reqStr string, moverRover roverMover) string {
 	var req Request
 	err := json.Unmarshal([]byte(reqStr), &req)
 	if err != nil {
@@ -39,15 +34,9 @@ func MoveRover(rover1 *ds.Rover, reqStr string) string {
 
 	log.Printf("Unmarshalled Rover: %+v", req)
 
-	switch req.Move {
-	case "up":
-		rover.Y -= 1
-	case "down":
-		rover.Y += 1
-	case "right":
-		rover.X += 1
-	case "left":
-		rover.X -= 1
+	rover, err := moverRover.MoveRover(req.Uuid, req.Move)
+	if err != nil {
+		return ""
 	}
 
 	res, _ := json.Marshal(rover)

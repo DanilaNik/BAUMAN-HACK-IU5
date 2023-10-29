@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS rover (
   name TEXT UNIQUE NOT NULL,
   x INTEGER NOT NULL CHECK (x >= 0 AND x <= 99),
   y INTEGER NOT NULL CHECK (y >= 0 AND y <= 99),
+  z INTEGER NOT NULL CHECK (y >= 0 AND y <= 99),
   angle INTEGER NOT NULL,
   charge INTEGER NOT NULL
 );
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS movement_history (
   rover_id INTEGER NOT NULL,
   x INTEGER NOT NULL,
   y INTEGER NOT NULL,
+  z INTEGER NOT NULL,
   stage TEXT NOT NULL,
   FOREIGN KEY (rover_id) REFERENCES rover(id)
 );
