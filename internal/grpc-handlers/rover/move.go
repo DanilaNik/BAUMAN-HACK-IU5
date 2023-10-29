@@ -64,7 +64,7 @@ func MoveRover(req *pb.Request, moverRover roverMover) *pb.Response {
 		X:           int64(rover.X),
 		Y:           int64(rover.Y),
 		Z:           int64(rover.Z),
-		Charge:      int64(rover.Charge),
+		Charge:      float32(rover.Charge),
 		Temperature: 0,
 		Warning:     warning,
 		Alert:       "",

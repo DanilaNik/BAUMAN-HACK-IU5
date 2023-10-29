@@ -1,8 +1,6 @@
 package sqlite
 
 import (
-	"fmt"
-
 	pb "github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5"
 	"github.com/DanilaNik/BAUMAN-HACK-IU5/internal/ds"
 	"github.com/jmoiron/sqlx"
@@ -14,11 +12,11 @@ type Storage struct {
 	Rover *ds.Rover
 }
 
-func New(storagePath string) (*Storage, error) {
+func New(storagePath string) *Storage {
 	const op = "storage.sqlite.New"
 	db, err := sqlx.Open("sqlite3", storagePath)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil
 	}
 	stmt, err := db.Prepare(`
 	CREATE TABLE IF NOT EXISTS rover (
@@ -43,27 +41,24 @@ func New(storagePath string) (*Storage, error) {
 	  );
 	`)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil
 	}
 
 	_, err = stmt.Exec()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil
 	}
 
 	storage := &Storage{db: db}
-	rover, _ := storage.GetRoverByUUID("00112233-4455-6677-8899-aabbccddeeff")
+	rover := storage.GetRoverByUUID("00112233-4455-6677-8899-aabbccddeeff")
 	storage.Rover = rover
-	return storage, nil
+	return storage
 }
 
-func (s *Storage) MoveRover(uuid string, req *pb.Request) (*ds.Rover, string, error) {
+func (s *Storage) MoveRover(uuid string, req *pb.Request) (*ds.Rover, string) {
 	const op = "storage.sqlite.MoveRover"
 
-	rover, err := s.GetRoverByUUID(uuid)
-	if err != nil {
-		return nil, "", fmt.Errorf("%s: %w", op, err)
-	}
+	rover := s.GetRoverByUUID(uuid)
 
 	var warning string
 
@@ -88,48 +83,45 @@ func (s *Storage) MoveRover(uuid string, req *pb.Request) (*ds.Rover, string, er
 	// 	}
 	// }
 
-	err = s.UpdateRover(rover)
-	if err != nil {
-		return nil, "", fmt.Errorf("%s: %w", op, err)
-	}
+	s.UpdateRover(rover)
 
 	// err = s.AddMovementHistory(rover, move)
 	// if err != nil {
 	// 	return nil, "", fmt.Errorf("%s: %w", op, err)
 	// }
 
-	return rover, warning, nil
+	return rover, warning
 }
 
-func (s *Storage) GetRoverByUUID(uuid string) (*ds.Rover, error) {
+func (s *Storage) GetRoverByUUID(uuid string) *ds.Rover {
 	const op = "storage.sqlite.GetRoverByUUID"
 
 	var rover ds.Rover
 	err := s.db.Get(&rover, "SELECT * FROM rover WHERE uuid = ?", uuid)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil
 	}
-	return &rover, nil
+	return &rover
 }
 
-func (s *Storage) UpdateRover(rover *ds.Rover) error {
+func (s *Storage) UpdateRover(rover *ds.Rover) {
 	const op = "storage.sqlite.UpdateRover"
 
 	_, err := s.db.Exec("UPDATE rover SET x = ?, y = ?, z = ? WHERE id = ?", rover.X, rover.Y, rover.Z, rover.ID)
 	if err != nil {
-		return fmt.Errorf("%s: %w", op, err)
+		return
 	}
 
-	return nil
+	return
 }
 
-func (s *Storage) AddMovementHistory(rover *ds.Rover, stage string) error {
+func (s *Storage) AddMovementHistory(rover *ds.Rover, stage string) {
 	const op = "storage.sqlite.AddMovementHistory"
 
 	_, err := s.db.Exec("INSERT INTO movement_history (rover_id, x, y, z, stage) VALUES (?, ?, ?, ?, ?)", rover.ID, rover.X, rover.Y, rover.Z, stage)
 	if err != nil {
-		return fmt.Errorf("%s: %w", op, err)
+		return
 	}
 
-	return nil
+	return
 }

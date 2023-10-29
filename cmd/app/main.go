@@ -25,15 +25,26 @@ type server struct {
 // 	s.rover = rover
 // }
 
-var rover *ds.Rover = &ds.Rover{
-	ID:     123,
-	Uuid:   "123",
-	Name:   "rover 1",
-	X:      1,
-	Y:      2,
-	Z:      3,
-	Angle:  0,
-	Charge: 100,
+var storage *sqlite.Storage = sqlite.New(storagePath)
+
+var rover *ds.Rover = storage.GetRoverByUUID("00112233-4455-6677-8899-aabbccddeeff")
+
+//var rover *ds.Rover = ds.Rover{
+// 	ID:     123,
+// 	Uuid:   "123",
+// 	Name:   "rover 1",
+// 	X:      1,
+// 	Y:      2,
+// 	Z:      3,
+// 	Angle:  0,
+// 	Charge: 100,
+// }
+
+var Temperature float32 = 0
+
+func temp(z int64) float32 {
+
+	return float32(z) / 100 * 10
 }
 
 var Warning string = "none"
@@ -43,6 +54,7 @@ var mx sync.Mutex
 
 func (s *server) BidirectionalStreaming(stream pb.Simulation_BidirectionalStreamingServer) error {
 	go chargeDrain()
+
 	log.Print("Start server")
 	for {
 		req, err := stream.Recv()
@@ -58,11 +70,12 @@ func (s *server) BidirectionalStreaming(stream pb.Simulation_BidirectionalStream
 		// Create and send the response
 		err = stream.Send(&pb.Response{
 			Uuid:        s.storage.Rover.Uuid,
+			Name:        rover.Name,
 			X:           int64(rover.X),
 			Y:           int64(rover.Y),
 			Z:           int64(rover.Z),
-			Charge:      int64(rover.Charge),
-			Temperature: 10,
+			Charge:      float32(rover.Charge),
+			Temperature: int64(temp(rover.Z)),
 			Warning:     Warning,
 			Alert:       Alert,
 		})
@@ -77,7 +90,11 @@ func (s *server) BidirectionalStreaming(stream pb.Simulation_BidirectionalStream
 func asyncMove(change *pb.Request) {
 	wg := &sync.WaitGroup{}
 	Warning = "moving"
+	if rover.Charge <= 0 {
+		return
+	}
 	wg.Add(3)
+	defer wg.Wait()
 	go func() {
 		step := 1
 		if change.X < 0 {
@@ -127,19 +144,21 @@ func asyncMove(change *pb.Request) {
 				continue
 			}
 			rover.Z += int64(step)
+
 			mx.Lock()
-			rover.Charge -= 0.01
+			if rover.Charge-0.01 >= 0 {
+				rover.Charge -= 0.01
+			}
 			mx.Unlock()
 			time.Sleep(time.Millisecond * 500)
 		}
 		wg.Done()
 	}()
-	wg.Wait()
 	Warning = "none"
 }
 
 func chargeDrain() {
-	ticker := time.NewTicker(time.Second * 10)
+	ticker := time.NewTicker(time.Second * 20)
 	for {
 		select {
 		case <-ticker.C:
@@ -147,18 +166,21 @@ func chargeDrain() {
 			if rover.Charge == 0 {
 				Alert = "no charge"
 			} else {
-				rover.Charge -= 1
+				if rover.Charge-0.1 >= 0 {
+					rover.Charge -= 0.1
+				}
 			}
 			mx.Unlock()
+			storage.UpdateRover(rover)
 		}
 	}
 }
 
 func main() {
-	storage, err := sqlite.New(storagePath)
-	if err != nil {
-		log.Fatalf("failed to init storage %v", err)
-	}
+	//storage, err := sqlite.New(storagePath)
+	// if err != nil {
+	// 	log.Fatalf("failed to init storage %v", err)
+	// }
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
