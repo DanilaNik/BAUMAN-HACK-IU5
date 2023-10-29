@@ -96,14 +96,14 @@ type Response struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Uuid        string `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
-	X           int64  `protobuf:"varint,2,opt,name=x,proto3" json:"x,omitempty"`
-	Y           int64  `protobuf:"varint,3,opt,name=y,proto3" json:"y,omitempty"`
-	Z           int64  `protobuf:"varint,4,opt,name=z,proto3" json:"z,omitempty"`
-	Charge      int64  `protobuf:"varint,5,opt,name=charge,proto3" json:"charge,omitempty"`
-	Temperature int64  `protobuf:"varint,6,opt,name=temperature,proto3" json:"temperature,omitempty"`
-	Warning     string `protobuf:"bytes,7,opt,name=warning,proto3" json:"warning,omitempty"`
-	Alert       string `protobuf:"bytes,8,opt,name=alert,proto3" json:"alert,omitempty"`
+	Uuid        string  `protobuf:"bytes,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
+	X           int64   `protobuf:"varint,2,opt,name=x,proto3" json:"x,omitempty"`
+	Y           int64   `protobuf:"varint,3,opt,name=y,proto3" json:"y,omitempty"`
+	Z           int64   `protobuf:"varint,4,opt,name=z,proto3" json:"z,omitempty"`
+	Charge      float32 `protobuf:"fixed32,5,opt,name=charge,proto3" json:"charge,omitempty"`
+	Temperature int64   `protobuf:"varint,6,opt,name=temperature,proto3" json:"temperature,omitempty"`
+	Warning     string  `protobuf:"bytes,7,opt,name=warning,proto3" json:"warning,omitempty"`
+	Alert       string  `protobuf:"bytes,8,opt,name=alert,proto3" json:"alert,omitempty"`
 }
 
 func (x *Response) Reset() {
@@ -166,7 +166,7 @@ func (x *Response) GetZ() int64 {
 	return 0
 }
 
-func (x *Response) GetCharge() int64 {
+func (x *Response) GetCharge() float32 {
 	if x != nil {
 		return x.Charge
 	}
@@ -209,7 +209,7 @@ var file_api_contract_proto_rawDesc = []byte{
 	0x28, 0x03, 0x52, 0x01, 0x78, 0x12, 0x0c, 0x0a, 0x01, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03,
 	0x52, 0x01, 0x79, 0x12, 0x0c, 0x0a, 0x01, 0x7a, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x01,
 	0x7a, 0x12, 0x16, 0x0a, 0x06, 0x63, 0x68, 0x61, 0x72, 0x67, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28,
-	0x03, 0x52, 0x06, 0x63, 0x68, 0x61, 0x72, 0x67, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x74, 0x65, 0x6d,
+	0x02, 0x52, 0x06, 0x63, 0x68, 0x61, 0x72, 0x67, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x74, 0x65, 0x6d,
 	0x70, 0x65, 0x72, 0x61, 0x74, 0x75, 0x72, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0b,
 	0x74, 0x65, 0x6d, 0x70, 0x65, 0x72, 0x61, 0x74, 0x75, 0x72, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x77,
 	0x61, 0x72, 0x6e, 0x69, 0x6e, 0x67, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x77, 0x61,

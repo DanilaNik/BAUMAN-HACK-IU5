@@ -1,9 +1,7 @@
 package move
 
 import (
-	"encoding/json"
-	"log"
-
+	pb "github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5"
 	"github.com/DanilaNik/BAUMAN-HACK-IU5/internal/ds"
 )
 
@@ -22,34 +20,57 @@ type Response struct {
 	Warning string `json:"warning"`
 }
 
+// func RoverLife(rover *ds.Rover) {
+// 	ticker := time.NewTicker(time.Millisecond * 500)
+
+// 	for {
+
+// 	}
+// }
+
 type roverMover interface {
-	MoveRover(uuid string, move string) (*ds.Rover, string, error)
+	MoveRover(uuid string, req *pb.Request) (*ds.Rover, string, error)
 }
 
-func MoveRover(reqStr string, moverRover roverMover) string {
-	var req Request
-	err := json.Unmarshal([]byte(reqStr), &req)
+func MoveRover(req *pb.Request, moverRover roverMover) *pb.Response {
+	// var req Request
+	// err := json.Unmarshal([]byte(reqStr), &req)
+	// if err != nil {
+	// 	log.Fatalf("failed to unmarshal JSON: %v", err)
+	// }
+
+	// log.Printf("Unmarshalled Rover: %+v", req)
+
+	rover, warning, err := moverRover.MoveRover(req.Uuid, req)
 	if err != nil {
-		log.Fatalf("failed to unmarshal JSON: %v", err)
+		return nil
 	}
 
-	log.Printf("Unmarshalled Rover: %+v", req)
+	// var resp Response = Response{
+	// 	Uuid:    rover.Uuid,
+	// 	Name:    rover.Name,
+	// 	X:       rover.X,
+	// 	Y:       rover.Y,
+	// 	Z:       rover.Z,
+	// 	Charge:  rover.Charge,
+	// 	Warning: warning,
+	// }
 
-	rover, warning, err := moverRover.MoveRover(req.Uuid, req.Move)
-	if err != nil {
-		return ""
+	// rover.X += uint64(req.X)
+	// rover.Y += uint64(req.Y)
+	// rover.Z += uint64(req.Z)
+	resp := &pb.Response{
+		Uuid:        rover.Uuid,
+		X:           int64(rover.X),
+		Y:           int64(rover.Y),
+		Z:           int64(rover.Z),
+		Charge:      int64(rover.Charge),
+		Temperature: 0,
+		Warning:     warning,
+		Alert:       "",
 	}
 
-	var resp Response = Response{
-		Uuid:    rover.Uuid,
-		Name:    rover.Name,
-		X:       rover.X,
-		Y:       rover.Y,
-		Z:       rover.Z,
-		Charge:  rover.Charge,
-		Warning: warning,
-	}
-
-	res, _ := json.Marshal(resp)
-	return string(res)
+	// res, _ := json.Marshal(resp)
+	// return string(res)
+	return resp
 }

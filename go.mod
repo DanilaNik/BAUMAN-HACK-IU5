@@ -5,7 +5,7 @@ go 1.21.3
 require github.com/gorilla/websocket v1.5.0
 
 require (
-	github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5 v0.0.0-20231028132314-c77c51693c3f // indirect
+	github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5 v0.0.0-20231029111310-6275bebdb547 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect

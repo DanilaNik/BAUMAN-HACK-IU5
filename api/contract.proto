@@ -20,7 +20,7 @@ message Response {
     int64 x = 2;
     int64 y = 3;
     int64 z = 4;
-    int64 charge = 5;
+    float charge = 5;
     int64 temperature = 6;
     string warning = 7;
     string alert = 8;

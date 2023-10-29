@@ -1,5 +1,7 @@
 github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5 v0.0.0-20231028132314-c77c51693c3f h1:vwxi5UISmDjIisN6SE6AtHKbzCQd812HMhYbfbPlsWE=
 github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5 v0.0.0-20231028132314-c77c51693c3f/go.mod h1:fz63baDR77MNJNxT2l7KIQNVTQijd9HMM8deEZyXqNg=
+github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5 v0.0.0-20231029111310-6275bebdb547 h1:n1Lguq3/ALU2Vb1yZWZoJ89oBkQaDZZoMhwS4UzzToE=
+github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5 v0.0.0-20231029111310-6275bebdb547/go.mod h1:fz63baDR77MNJNxT2l7KIQNVTQijd9HMM8deEZyXqNg=
 github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg=

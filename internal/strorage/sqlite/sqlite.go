@@ -3,13 +3,15 @@ package sqlite
 import (
 	"fmt"
 
+	pb "github.com/DanilaNik/BAUMAN-HACK-IU5/github.com/DanilaNik/BAUMAN-HACK-IU5"
 	"github.com/DanilaNik/BAUMAN-HACK-IU5/internal/ds"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type Storage struct {
-	db *sqlx.DB
+	db    *sqlx.DB
+	Rover *ds.Rover
 }
 
 func New(storagePath string) (*Storage, error) {
@@ -49,10 +51,13 @@ func New(storagePath string) (*Storage, error) {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return &Storage{db: db}, nil
+	storage := &Storage{db: db}
+	rover, _ := storage.GetRoverByUUID("00112233-4455-6677-8899-aabbccddeeff")
+	storage.Rover = rover
+	return storage, nil
 }
 
-func (s *Storage) MoveRover(uuid string, move string) (*ds.Rover, string, error) {
+func (s *Storage) MoveRover(uuid string, req *pb.Request) (*ds.Rover, string, error) {
 	const op = "storage.sqlite.MoveRover"
 
 	rover, err := s.GetRoverByUUID(uuid)
@@ -62,36 +67,36 @@ func (s *Storage) MoveRover(uuid string, move string) (*ds.Rover, string, error)
 
 	var warning string
 
-	switch move {
-	case "up":
-		if rover.Y >= 1 {
-			rover.Y -= 1
-		}
-	case "down":
-		if rover.Y+1 >= 95 {
-			warning = fmt.Sprintf("Опасность, достигнута максимальная безопасная глубина %d", rover.X)
-			break
-		}
-		rover.Y += 1
-	case "right":
-		if rover.X <= 98 {
-			rover.X += 1
-		}
-	case "left":
-		if rover.X >= 1 {
-			rover.X -= 1
-		}
-	}
+	// switch move {
+	// case "up":
+	// 	if rover.Y >= 1 {
+	// 		rover.Y -= 1
+	// 	}
+	// case "down":
+	// 	if rover.Y+1 >= 95 {
+	// 		warning = fmt.Sprintf("Опасность, достигнута максимальная безопасная глубина %d", rover.X)
+	// 		break
+	// 	}
+	// 	rover.Y += 1
+	// case "right":
+	// 	if rover.X <= 98 {
+	// 		rover.X += 1
+	// 	}
+	// case "left":
+	// 	if rover.X >= 1 {
+	// 		rover.X -= 1
+	// 	}
+	// }
 
 	err = s.UpdateRover(rover)
 	if err != nil {
 		return nil, "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	err = s.AddMovementHistory(rover, move)
-	if err != nil {
-		return nil, "", fmt.Errorf("%s: %w", op, err)
-	}
+	// err = s.AddMovementHistory(rover, move)
+	// if err != nil {
+	// 	return nil, "", fmt.Errorf("%s: %w", op, err)
+	// }
 
 	return rover, warning, nil
 }
