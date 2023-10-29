@@ -19,6 +19,7 @@ type server struct {
 }
 
 func (s *server) BidirectionalStreaming(stream pb.MyService_BidirectionalStreamingServer) error {
+	log.Print("Start server")
 	for {
 		req, err := stream.Recv()
 		if err != nil {
@@ -43,7 +44,7 @@ func (s *server) BidirectionalStreaming(stream pb.MyService_BidirectionalStreami
 func main() {
 	storage, err := sqlite.New(storagePath)
 	if err != nil {
-		log.Fatalf("failed to init storage %w", err)
+		log.Fatalf("failed to init storage %v", err)
 	}
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/DanilaNik/BAUMAN-HACK-IU5/internal/ds"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Storage struct {
@@ -51,35 +52,48 @@ func New(storagePath string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) MoveRover(uuid string, move string) (*ds.Rover, error) {
+func (s *Storage) MoveRover(uuid string, move string) (*ds.Rover, string, error) {
 	const op = "storage.sqlite.MoveRover"
 
 	rover, err := s.GetRoverByUUID(uuid)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil, "", fmt.Errorf("%s: %w", op, err)
 	}
+
+	var warning string
+
 	switch move {
 	case "up":
-		rover.Y -= 1
+		if rover.Y >= 1 {
+			rover.Y -= 1
+		}
 	case "down":
+		if rover.Y+1 >= 95 {
+			warning = fmt.Sprintf("Опасность, достигнута максимальная безопасная глубина %d", rover.X)
+			break
+		}
 		rover.Y += 1
 	case "right":
-		rover.X += 1
+		if rover.X <= 98 {
+			rover.X += 1
+		}
 	case "left":
-		rover.X -= 1
+		if rover.X >= 1 {
+			rover.X -= 1
+		}
 	}
 
 	err = s.UpdateRover(rover)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil, "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	err = s.AddMovementHistory(rover, move)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return nil, "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	return rover, nil
+	return rover, warning, nil
 }
 
 func (s *Storage) GetRoverByUUID(uuid string) (*ds.Rover, error) {

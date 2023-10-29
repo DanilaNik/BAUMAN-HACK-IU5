@@ -13,16 +13,17 @@ type Request struct {
 }
 
 type Response struct {
-	Uuid   string `json:"uuid"`
-	Name   string `json:"name"`
-	X      uint64 `json:"x"`
-	Y      uint64 `json:"y"`
-	Angle  uint64 `json:"angle"`
-	Charge uint64 `json:"charge"`
+	Uuid    string `json:"uuid"`
+	Name    string `json:"name"`
+	X       uint64 `json:"x"`
+	Y       uint64 `json:"y"`
+	Z       uint64 `json:"z"`
+	Charge  uint64 `json:"charge"`
+	Warning string `json:"warning"`
 }
 
 type roverMover interface {
-	MoveRover(uuid string, move string) (*ds.Rover, error)
+	MoveRover(uuid string, move string) (*ds.Rover, string, error)
 }
 
 func MoveRover(reqStr string, moverRover roverMover) string {
@@ -34,11 +35,21 @@ func MoveRover(reqStr string, moverRover roverMover) string {
 
 	log.Printf("Unmarshalled Rover: %+v", req)
 
-	rover, err := moverRover.MoveRover(req.Uuid, req.Move)
+	rover, warning, err := moverRover.MoveRover(req.Uuid, req.Move)
 	if err != nil {
 		return ""
 	}
 
-	res, _ := json.Marshal(rover)
+	var resp Response = Response{
+		Uuid:    rover.Uuid,
+		Name:    rover.Name,
+		X:       rover.X,
+		Y:       rover.Y,
+		Z:       rover.Z,
+		Charge:  rover.Charge,
+		Warning: warning,
+	}
+
+	res, _ := json.Marshal(resp)
 	return string(res)
 }
