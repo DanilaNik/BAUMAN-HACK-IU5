@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"math"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -75,7 +77,7 @@ func (s *server) BidirectionalStreaming(stream pb.Simulation_BidirectionalStream
 			Y:           int64(rover.Y),
 			Z:           int64(rover.Z),
 			Charge:      float32(rover.Charge),
-			Temperature: int64(temp(rover.Z)),
+			Temperature: temp(rover.Z),
 			Warning:     Warning,
 			Alert:       Alert,
 		})
@@ -94,7 +96,7 @@ func asyncMove(change *pb.Request) {
 		return
 	}
 	wg.Add(3)
-	defer wg.Wait()
+
 	go func() {
 		step := 1
 		if change.X < 0 {
@@ -105,6 +107,9 @@ func asyncMove(change *pb.Request) {
 			if tmp <= 0 || tmp >= 100 {
 				continue
 			}
+			// if int64(PointMap[uint64(rover.X)][uint64(rover.Y)]) <= rover.Z {
+			// 	rover.Z -= 1
+			// }
 			rover.X += int64(step)
 			mx.Lock()
 			rover.Charge -= 0.01
@@ -124,6 +129,9 @@ func asyncMove(change *pb.Request) {
 			if tmp <= 0 || tmp >= 100 {
 				continue
 			}
+			// if int64(PointMap[uint64(rover.X)][uint64(rover.Y)]) <= rover.Z {
+			// 	rover.Z -= 1
+			// }
 			rover.Y += int64(step)
 			// }
 			mx.Lock()
@@ -143,6 +151,9 @@ func asyncMove(change *pb.Request) {
 			if tmp <= 0 || tmp >= 100 {
 				continue
 			}
+			// if tmp >= int64(PointMap[uint64(rover.X)][uint64(rover.Y)]) {
+			// 	continue
+			// }
 			rover.Z += int64(step)
 
 			mx.Lock()
@@ -154,6 +165,7 @@ func asyncMove(change *pb.Request) {
 		}
 		wg.Done()
 	}()
+	wg.Wait()
 	Warning = "none"
 }
 
@@ -171,16 +183,31 @@ func chargeDrain() {
 				}
 			}
 			mx.Unlock()
-			storage.UpdateRover(rover)
+			//storage.UpdateRover(rover)
 		}
 	}
 }
+
+type Point struct {
+	X int64 `json:"x"`
+	Y int64 `json:"y"`
+	Z int64 `json:"z"`
+}
+
+var PointArr = make([]Point, 0)
+var PointMap = make(map[uint64]map[uint64]uint64)
 
 func main() {
 	//storage, err := sqlite.New(storagePath)
 	// if err != nil {
 	// 	log.Fatalf("failed to init storage %v", err)
 	// }
+
+	fileBytes, _ := os.ReadFile("result.json")
+	_ = json.Unmarshal(fileBytes, PointArr)
+	for _, v := range PointArr {
+		PointMap[uint64(v.X)][uint64(v.Y)] = uint64(v.Z)
+	}
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
